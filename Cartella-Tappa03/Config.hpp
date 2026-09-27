@@ -1,0 +1,10 @@
+#pragma once
+
+struct Config {
+    static constexpr unsigned int WindowWidth = 800;
+    static constexpr unsigned int WindowHeight = 600;
+    static constexpr float PlayerSpeed = 5.0f;
+    static constexpr float BulletSpeed = 15.0f;
+    static constexpr float NoseOffset = 25.0f;
+    static constexpr float EnemySpeed = 2.0f;
+};
