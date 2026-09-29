@@ -52,7 +52,7 @@ In questa terza fase, il gameplay inizia a prendere forma introducendo i bersagl
 ## Tappa 04: Gestione delle Collisioni e Interazione tra le Entità
 
 ### Cosa aggiunge o risolve questa tappa
-Dopo aver introdotto i nemici nella Tappa 03, il gameplay necessitava di un sistema di interazione effettivo. In questa quarta tappa, il focus principale è risolvere il problema delle collisioni e gestire in modo coerente il ciclo di vita delle entità attive. 
+In questa quarta tappa, il focus principale è risolvere il problema delle collisioni e gestire in modo coerente il ciclo di vita delle entità attive. 
 Nello specifico, questa tappa aggiunge:
 *   **Rilevamento delle collisioni:** Implementazione della logica che verifica l'impatto tra i proiettili (`Bullet.hpp`) generati dal giocatore e i nemici (`Enemy.hpp`) presenti sullo schermo.
 *   **Distruzione e Memory Management:** Aggiornamento della logica nel Game Loop principale (`Game.cpp`) per rimuovere correttamente le entità quando collidono.
