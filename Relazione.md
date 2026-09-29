@@ -35,3 +35,18 @@ Nello specifico, questa tappa aggiunge:
 *   **Integrazione nel Game Loop:** Le classi principali, in particolare `Game.cpp` e `Player.cpp`, sono state espanse per intercettare gli input della tastiera (attraverso gli eventi SFML), aggiornare coerentemente lo stato di posizione del giocatore e gestire il rendering dinamico dei proiettili attivi.
 *   **Funzione `updateRotation()`***: Per permettere al giocatore di orientare lo sparo tramite l'arcotangente e il calcolo dell'inclinazione tra navicella e cursore tramite `sf::radians`
 
+## Tappa 03: Implementazione dei Nemici e Logica di Base 
+### Cosa aggiunge o risolve questa tappa 
+In questa terza fase, il gameplay inizia a prendere forma introducendo i bersagli per la meccanica di sparo implementata nella fase precedente. Nello specifico, questa tappa aggiunge: 
+* **L'entità Nemico (Enemy):** Introduzione della struttura per i nemici tramite il nuovo file `Enemy.hpp`. Questo permette di definire le caratteristiche e le forme degli avversari che il giocatore dovrà affrontare. 
+* **Gestione Multipla:** Modifica della logica centrale del gioco per supportare la generazione e la gestione di diverse istanze nemiche contemporaneamente all'interno dell'area di gioco. 
+* **Evoluzione del Game Loop:** Aggiornamento delle classi `Game.cpp` e `Game.hpp` per elaborare il comportamento, il movimento e il rendering grafico dei nemici ad ogni ciclo di vita dell'applicazione.
+
+<img width="805" height="626" alt="image" src="https://github.com/user-attachments/assets/4cc8f6cb-d277-4039-810d-8685814549b3" />
+
+### Soluzioni tecniche adottate 
+* **Modularità dell'Avversario:** Mantenendo la coerenza con l'architettura orientata agli oggetti, la definizione del nemico è stata isolata nel modulo `Enemy.hpp`, separando la sua logica interna da quella del giocatore e del motore di gioco. 
+* **Contenitori Dinamici per le Entità:** Per gestire un numero variabile e scalabile di nemici attivi sullo schermo, vengono sfruttati i contenitori standard del C++ integrati all'interno della classe `Game`. 
+* **Estensione della Configurazione:** Sfruttando la soluzione tecnica del file `Config.hpp` introdotta nella Tappa 02, anche le costanti relative al comportamento dei nemici mantengono un approccio centralizzato per un rapido bilanciamento
+
+
