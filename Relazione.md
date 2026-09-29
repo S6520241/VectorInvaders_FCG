@@ -49,4 +49,22 @@ In questa terza fase, il gameplay inizia a prendere forma introducendo i bersagl
 * **Contenitori Dinamici per le Entità:** Per gestire un numero variabile e scalabile di nemici attivi sullo schermo, vengono sfruttati i contenitori standard del C++ integrati all'interno della classe `Game`. 
 * **Estensione della Configurazione:** Sfruttando la soluzione tecnica del file `Config.hpp` introdotta nella Tappa 02, anche le costanti relative al comportamento dei nemici mantengono un approccio centralizzato per un rapido bilanciamento
 
+## Tappa 04: Gestione delle Collisioni e Interazione tra le Entità
+
+### Cosa aggiunge o risolve questa tappa
+Dopo aver introdotto i nemici nella Tappa 03, il gameplay necessitava di un sistema di interazione effettivo. In questa quarta tappa, il focus principale è risolvere il problema delle collisioni e gestire in modo coerente il ciclo di vita delle entità attive. 
+Nello specifico, questa tappa aggiunge:
+*   **Rilevamento delle collisioni:** Implementazione della logica che verifica l'impatto tra i proiettili (`Bullet.hpp`) generati dal giocatore e i nemici (`Enemy.hpp`) presenti sullo schermo.
+*   **Distruzione e Memory Management:** Aggiornamento della logica nel Game Loop principale (`Game.cpp`) per rimuovere correttamente le entità quando collidono.
+*   **Aggiornamento del Giocatore e dello Stato:** Integrazione dei controlli di interazione all'interno di `Player.cpp` e `Player.hpp`, e aggiornamento dei flussi in `GameState.hpp`.
+
+
+https://github.com/user-attachments/assets/381fffc6-c923-439d-8491-0dff5eeb2b51
+
+### Soluzioni tecniche adottate
+*   **Gestione sicura della cancellazione (Erase-Remove):** La rimozione degli elementi distrutti viene gestita aggiornando in modo isolato i vettori, evitando conflitti durante il Game Loop.
+*   **Hitbox e Intersezioni:** Viene calcolata e verificata l'intersezione matematica tra le aree (bounding box) occupate dalle forme geometriche di `Bullet` ed `Enemy`.
+*   **Scalabilità della Configurazione:** Le costanti relative ai parametri delle hitbox o alle distanze di interazione sono state integrate e gestite all'interno di `Config.hpp`.
+
+
 
