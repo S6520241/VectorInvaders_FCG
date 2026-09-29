@@ -54,6 +54,12 @@ I controlli dell'interfaccia utente si evolvono con l'avanzare delle tappe di sv
 
 **Tasto Destro del Mouse**: Attivazione del sistema di sparo.
 
+## Tappa 07 - Power Up
+
+**Scudo protettivo**: Permette di assorbire i danni e non perdere la vita in caso di collisione o impatto.   
+
+**Sparo a ventaglio**: Consente di sparare proiettili multipli.
+
 ## Tappa 09 - Gestione Stato di Pausa e Menu:
 
 **P**: Interruzione temporanea della partita (Pausa) e visualizzazione dell'interfaccia di menu.
