@@ -46,7 +46,7 @@ I controlli dell'interfaccia utente si evolvono con l'avanzare delle tappe di sv
 
 **Esc**: Chiusura / Uscita dall'applicazione.
 
-**W, A, S, D** oppure **Frecce Direzionali**: Spostamento della navicella nello spazio di gioco.
+**Tasti W, A, S, D** oppure **Frecce Direzionali**: Spostamento della navicella nello spazio di gioco.
 
 ## Tappa 02 - Puntamento e Sparo:
 
@@ -62,4 +62,4 @@ I controlli dell'interfaccia utente si evolvono con l'avanzare delle tappe di sv
 
 ## Tappa 09 - Gestione Stato di Pausa e Menu:
 
-**P**: Interruzione temporanea della partita (Pausa) e visualizzazione dell'interfaccia di menu.
+**Tasto P**: Interruzione temporanea della partita (Pausa) e visualizzazione dell'interfaccia di menu.
