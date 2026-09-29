@@ -30,7 +30,7 @@ Nello specifico, questa tappa aggiunge:
 <img width="812" height="631" alt="image" src="https://github.com/user-attachments/assets/9263b582-0fab-4eeb-9fa7-0f4684d5cac6" />
 
 ### Soluzioni tecniche adottate
-*   **Centralizzazione dei Parametri:** È stato introdotto il file `Config.hpp`. Questa soluzione permette di raggruppare tutte le costanti di gioco (come dimensioni della finestra, velocità di movimento del giocatore, velocità dei proiettili) in un unico posto, evitando l'uso di variabili numeriche sparse nel codice e facilitando il futuro bilanciamento del videogioco.
+*   **Centralizzazione dei Parametri:** È stato introdotto il file `Config.hpp`. Questa soluzione permette di raggruppare tutte le costanti di gioco (come dimensioni della finestra, velocità di movimento del giocatore, velocità dei proiettili) in un unico file, evitando l'uso di variabili numeriche sparse nel codice e facilitando il futuro bilanciamento del gioco.
 *   **Gestione Indipendente dei Proiettili:** La logica dei colpi sparati è stata incapsulata nel file `Bullet.hpp`. Questo permette di istanziare e gestire in memoria molteplici proiettili in modo scalabile.
 *   **Integrazione nel Game Loop:** Le classi principali, in particolare `Game.cpp` e `Player.cpp`, sono state espanse per intercettare gli input della tastiera (attraverso gli eventi SFML), aggiornare coerentemente lo stato di posizione del giocatore e gestire il rendering dinamico dei proiettili attivi.
 *   **Funzione `updateRotation()`***: Per permettere al giocatore di orientare lo sparo tramite l'arcotangente e il calcolo dell'inclinazione tra navicella e cursore tramite `sf::radians`
