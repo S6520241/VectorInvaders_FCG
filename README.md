@@ -33,6 +33,7 @@ Dalla cartella build/, avviare la tappa desiderata specificando il nome dell'ese
 
 # Esempio: Esecuzione della Tappa 02
 ./Tappa02
+# ...
 ```
 
 ### Elenco Schematico dell'Interfaccia Utente (Tastiera e Mouse)
