@@ -2,7 +2,7 @@
 ## Tappa 01: Setup dell'Ambiente e Architettura di Base
 ### Cosa si propone di fare il progetto
 Il progetto si propone di sviluppare **VectorInvaders**, un videogioco arcade 2D interattivo sviluppato in **C++**. Come da requisiti, il progetto fa affidamento sulla libreria multimediale **SFML 3.0** per la gestione del rendering grafico, degli input e dell'audio, e utilizza **CMake** come sistema di build.
-L'obiettivo a lungo termine (attraverso le 10 tappe previste) è quello di creare uno sparatutto a scorrimento completo di giocatore, nemici, collisioni e sistema di punteggio, applicando i concetti fondamentali della grafica computerizzata e della programmazione orientata agli oggetti.
+L'obiettivo a lungo termine (attraverso le 10 tappe previste) è quello di creare uno sparatutto a scorrimento completo di giocatore, nemici, collisioni e sistema di punteggio, applicando i concetti fondamentali della grafica computerizzata.
 
 ### Cosa aggiunge o risolve questa tappa
 In questa prima tappa non sono ancora presenti elementi di gameplay. L'obiettivo primario è **gettare le fondamenta dell'applicazione**, risolvendo il problema dell'inizializzazione del progetto.
