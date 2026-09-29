@@ -1,6 +1,6 @@
 # VectorInvaders
 
-**VectorInvaders** è un'applicazione grafica interattiva 2D sviluppata in C++ utilizzando la libreria **SFML 3.0** e **CMake**. Il progetto è articolato in 10 tappe di sviluppo progressivo.
+**VectorInvaders** è un'applicazione grafica interattiva 2D sviluppata in C++ utilizzando la libreria **SFML 3.0**. Il progetto è articolato in 10 tappe di sviluppo progressivo.
 
 ## 1. Requisiti e Compilazione
 
