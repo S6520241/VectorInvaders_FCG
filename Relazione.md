@@ -19,7 +19,7 @@ In questo modo, il file `main.cpp` si limita esclusivamente a istanziare l'ogget
 ## Tappa 02: Implementazione del Giocatore e Meccanica di Sparo
 
 ### Cosa aggiunge o risolve questa tappa
-Dopo aver preparato il contesto grafico e il Game Loop principale, in questa seconda tappa il progetto compie il primo passo verso il gameplay interattivo. 
+In questa seconda tappa il progetto compie il primo passo verso il gameplay interattivo. 
 Nello specifico, questa tappa aggiunge:
 *   **L'entità Giocatore (Player):** Implementazione della navicella controllabile dall'utente (`Player.cpp`, `Player.hpp`), del suo movimento e nel direzionamento dello sparo
 *   **La meccanica di sparo (Bullet):** Introduzione dei proiettili (`Bullet.hpp`) che il giocatore può generare per difendersi
