@@ -84,7 +84,6 @@ Nello specifico, questa tappa aggiunge:
 *   **Sprite per giocatore e nemici:** Giocatore e nemici non sono più rettangoli colorati ma sprite (`sf::Sprite`) con texture caricate dalla cartella `Cartella-risorse` (`player.png`, `enemy.png`).
 *   **Caricamento delle risorse:** Un nuovo metodo `loadResources()` carica le texture all'avvio e segnala in console eventuali file mancanti.
 *   **File `Enemy.cpp`:** Il nemico ottiene un costruttore che riceve la texture da utilizzare.
-*   **Finestra centrata:** All'avvio la finestra di gioco viene posizionata al centro del desktop.
 
 <img width="812" height="632" alt="image" src="https://github.com/user-attachments/assets/533f4e0d-dd4a-47d6-bc51-dcbce9760cef" />
 
