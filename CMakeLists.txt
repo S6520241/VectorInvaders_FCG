@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16) 
-project(SpaceInvadersEsame LANGUAGES CXX)
+project(VectorInvaders LANGUAGES CXX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -14,18 +14,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SFML)
 
-FetchContent_Declare(
-    glm
-    GIT_REPOSITORY https://github.com/g-truc/glm.git
-    GIT_TAG 1.0.3
-)
-FetchContent_MakeAvailable(glm)
-
 add_library(common INTERFACE)
 target_compile_features(common INTERFACE cxx_std_20)
-
-# find_package(OpenGL REQUIRED)
-# find_package(SFML 3.0 COMPONENTS graphics window audio system REQUIRED)
 
 # --- TAPPA 01 ---
 add_executable(Tappa01
