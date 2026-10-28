@@ -7,7 +7,7 @@
 ### Requisiti di Sistema
 - **Compilatore C++**: C++17 o superiore.
 - **CMake**: Versione 3.16 o superiore.
-- **SFML**: Versione 3.0 (moduli `graphics`, `window`, `system`, `audio`). Non è necessario installarla: viene scaricata e compilata automaticamente da CMake, quindi alla prima configurazione serve una connessione internet.
+- **SFML**: Versione 3.0 (moduli `graphics`, `window`, `system`, `audio`). Non è necessario installarla: viene scaricata e compilata automaticamente da CMake, quindi alla prima configurazione serve una connessione internet. Su Linux sono richieste le librerie di sistema necessarie a SFML (X11, OpenGL, udev, freetype, librerie audio).
 
 ### Metodo Unico di Compilazione
 Per compilare l'intero progetto, eseguire le seguenti istruzioni dalla radice del repository:
