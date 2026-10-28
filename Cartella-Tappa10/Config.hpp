@@ -6,13 +6,17 @@ struct Config {
     static constexpr float PlayerSpeed = 5.0f;
     static constexpr float BulletSpeed = 15.0f;
     static constexpr float NoseOffset = 25.0f;
-    static constexpr float EnemySpeed = 2.0f;
+    static constexpr float EnemySpeed = 2.5f; // Modificato in Tappa 10
     static constexpr float TargetPlayerSize = 50.f;
     static constexpr float TargetEnemySize = 30.f;
     static constexpr float TargetTankSize = 55.f;
     static constexpr float TargetPowerUpSize = 30.f;
+
+    // Le immagini sono disegnate rivolte verso l'alto, mentre l'angolo 0 di atan2 punta a destra:
+    // per allineare sprite e direzione si aggiunge un quarto di giro (pi/2)
+    static constexpr float SpriteRotationOffset = 1.5707963f;
     
     // Nuove costanti Tappa 08
     static constexpr float ShakeIntensity = 8.0f;
-    static constexpr int StarCount = 200;
+    static constexpr int StarCount = 150;
 };

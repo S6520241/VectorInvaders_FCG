@@ -122,3 +122,5 @@ I controlli dell'interfaccia utente si evolvono con l'avanzare delle tappe di sv
 
 **Difficoltà progressiva**: La frequenza di comparsa dei nemici aumenta con il tempo di sopravvivenza.
 
+**Schermata di Game Over**: Mostra il punteggio finale; premendo **Invio** si torna al menu principale.
+

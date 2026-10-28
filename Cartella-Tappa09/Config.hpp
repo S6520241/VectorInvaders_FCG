@@ -11,8 +11,12 @@ struct Config {
     static constexpr float TargetEnemySize = 30.f;
     static constexpr float TargetTankSize = 55.f;
     static constexpr float TargetPowerUpSize = 30.f;
+
+    // Le immagini sono disegnate rivolte verso l'alto, mentre l'angolo 0 di atan2 punta a destra:
+    // per allineare sprite e direzione si aggiunge un quarto di giro (pi/2)
+    static constexpr float SpriteRotationOffset = 1.5707963f;
     
     // Nuove costanti Tappa 08
     static constexpr float ShakeIntensity = 8.0f;
-    static constexpr int StarCount = 200;
+    static constexpr int StarCount = 150;
 };

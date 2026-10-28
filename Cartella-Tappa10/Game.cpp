@@ -2,8 +2,8 @@
 #include <iostream>
 #include <cmath>
 
-Game::Game() : 
-    window(sf::VideoMode({800, 600}), "VectorInvaders - Completo"),
+Game::Game() :
+    window(sf::VideoMode({Config::WindowWidth, Config::WindowHeight}), "VectorInvaders - Completo"),
     currentState(GameState::MainMenu),
     survivalTime(0.0f),
     hudText(font),
@@ -14,12 +14,9 @@ Game::Game() :
     pauseText(font),
     menuTextPause(font),
     exitTextPause(font),
+    gameOverText(font),
+    finalScoreText(font),
     player(playerTex),
-    playerScale(1.0f),
-    playerSpeed(5.0f),
-    bulletSpeed(15.0f),
-    noseOffset(25.0f),
-    enemySpeed(2.5f), // Modificato in Tappa10
     currentSpawnRate(1.0f),
     powerUpSpawnRate(sf::seconds(12.0f)), // Modificato in Tappa10
     hasSpread(false),
@@ -27,13 +24,12 @@ Game::Game() :
     shieldVisual(40.f),
     isInvulnerable(false),
     shakeDuration(0.f),
-    shakeIntensity(8.0f),
     typeDist(1, 100),
     sideDist(0, 3),
     xDist(50.f, 750.f),
     yDist(50.f, 550.f),
-    xFullDist(0.f, 800.f),
-    yFullDist(0.f, 600.f),
+    xFullDist(0.f, static_cast<float>(Config::WindowWidth)),
+    yFullDist(0.f, static_cast<float>(Config::WindowHeight)),
     radiusDist(0.5f, 2.5f),
     alphaDist(100, 255),
     score(0),
@@ -41,6 +37,7 @@ Game::Game() :
 {
     window.setFramerateLimit(60);
 
+    // Per centrare la finestra
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
     sf::Vector2i centerPos(
         (desktop.size.x - window.getSize().x) / 2,
@@ -48,6 +45,28 @@ Game::Game() :
     );
     window.setPosition(centerPos);
 
+    loadResources();
+    setupUI();
+
+    // Inizializzazione del giocatore tramite la classe Player
+    player.init(playerTex, Config::TargetPlayerSize, Config::WindowWidth / 2.f, Config::WindowHeight / 2.f);
+
+    shieldVisual.setFillColor(sf::Color(0, 255, 255, 100));
+    shieldVisual.setOrigin({40.f, 40.f});
+
+    gameView = window.getDefaultView();
+
+    std::random_device rd;
+    gen.seed(rd());
+
+    initStars();
+}
+
+// ---------------------------------------------------------------------------
+// Inizializzazione
+// ---------------------------------------------------------------------------
+
+void Game::loadResources() {
     // Caricamento Grafica e Testo
     if (!playerTex.loadFromFile("../Cartella-risorse/player.png")) std::cerr << "Errore: player.png\n";
     if (!enemyTex.loadFromFile("../Cartella-risorse/enemy.png")) std::cerr << "Errore: enemy.png\n";
@@ -61,124 +80,109 @@ Game::Game() :
     // Caricamento Audio
     if (!shootBuffer.loadFromFile("../Cartella-risorse/shoot.wav")) std::cerr << "Errore: shoot.wav\n";
     if (!explosionBuffer.loadFromFile("../Cartella-risorse/explosion.wav")) std::cerr << "Errore: explosion.wav\n";
-    
+
     if (!bgMusic.openFromFile("../Cartella-risorse/music.mp3")) std::cerr << "Errore: music.mp3\n";
     bgMusic.setLooping(true);
     bgMusic.setVolume(30.f);
+}
 
+void Game::setupUI() {
+    const float centerX = Config::WindowWidth / 2.f;
+
+    // HUD
     hudText.setCharacterSize(20);
     hudText.setFillColor(sf::Color::White);
     hudText.setPosition({10.f, 10.f});
 
+    // Menu principale
     titleText.setString("VECTOR INVADERS");
     titleText.setCharacterSize(50);
     titleText.setFillColor(sf::Color::White);
-    sf::FloatRect titleBounds = titleText.getLocalBounds();
-    titleText.setOrigin({titleBounds.size.x / 2.f, titleBounds.size.y / 2.f});
-    titleText.setPosition({400.f, 150.f});
+    centerText(titleText, {centerX, 150.f});
 
-    startButton.setSize({200.f, 60.f});
-    startButton.setFillColor(sf::Color(100, 100, 100));
-    startButton.setOutlineThickness(2.f);
-    startButton.setOutlineColor(sf::Color::White);
-    startButton.setOrigin({100.f, 30.f});
-    startButton.setPosition({400.f, 300.f});
-
-    startText.setString("INIZIA");
-    startText.setCharacterSize(30);
-    startText.setFillColor(sf::Color::White);
-    sf::FloatRect startBounds = startText.getLocalBounds();
-    startText.setOrigin({startBounds.size.x / 2.f, startBounds.size.y / 2.f});
-    startText.setPosition(startButton.getPosition());
-
-    exitButtonMenu.setSize({200.f, 60.f});
-    exitButtonMenu.setFillColor(sf::Color(100, 100, 100));
-    exitButtonMenu.setOutlineThickness(2.f);
-    exitButtonMenu.setOutlineColor(sf::Color::White);
-    exitButtonMenu.setOrigin({100.f, 30.f});
-    exitButtonMenu.setPosition({400.f, 400.f});
-
-    exitTextMenu.setString("ESCI");
-    exitTextMenu.setCharacterSize(30);
-    exitTextMenu.setFillColor(sf::Color::White);
-    sf::FloatRect exitBoundsM = exitTextMenu.getLocalBounds();
-    exitTextMenu.setOrigin({exitBoundsM.size.x / 2.f, exitBoundsM.size.y / 2.f});
-    exitTextMenu.setPosition(exitButtonMenu.getPosition());
+    setupButton(startButton, startText, "INIZIA", {centerX, 300.f}, {200.f, 60.f}, 30);
+    setupButton(exitButtonMenu, exitTextMenu, "ESCI", {centerX, 400.f}, {200.f, 60.f}, 30);
 
     promptText.setString("oppure premi INVIO per giocare");
     promptText.setCharacterSize(20);
     promptText.setFillColor(sf::Color(200, 200, 200));
-    sf::FloatRect promptBounds = promptText.getLocalBounds();
-    promptText.setOrigin({promptBounds.size.x / 2.f, promptBounds.size.y / 2.f});
-    promptText.setPosition({400.f, 520.f});
+    centerText(promptText, {centerX, 520.f});
 
-    pauseOverlay.setSize({800.f, 600.f});
+    // Menu di pausa
+    pauseOverlay.setSize({static_cast<float>(Config::WindowWidth), static_cast<float>(Config::WindowHeight)});
     pauseOverlay.setFillColor(sf::Color(0, 0, 0, 150));
 
     pauseText.setString("PAUSA");
     pauseText.setCharacterSize(40);
     pauseText.setFillColor(sf::Color::Yellow);
-    sf::FloatRect pauseBounds = pauseText.getLocalBounds();
-    pauseText.setOrigin({pauseBounds.size.x / 2.0f, pauseBounds.size.y / 2.0f});
-    pauseText.setPosition({400.f, 150.f});
+    centerText(pauseText, {centerX, 150.f});
 
-    menuButtonPause.setSize({350.f, 60.f});
-    menuButtonPause.setFillColor(sf::Color(100, 100, 100));
-    menuButtonPause.setOutlineThickness(2.f);
-    menuButtonPause.setOutlineColor(sf::Color::White);
-    menuButtonPause.setOrigin({175.f, 30.f});
-    menuButtonPause.setPosition({400.f, 300.f});
+    setupButton(menuButtonPause, menuTextPause, "MENU PRINCIPALE", {centerX, 300.f}, {350.f, 60.f}, 25);
+    setupButton(exitButtonPause, exitTextPause, "ESCI DAL GIOCO", {centerX, 400.f}, {350.f, 60.f}, 25);
 
-    menuTextPause.setString("MENU PRINCIPALE");
-    menuTextPause.setCharacterSize(25);
-    menuTextPause.setFillColor(sf::Color::White);
-    sf::FloatRect menuBoundsP = menuTextPause.getLocalBounds();
-    menuTextPause.setOrigin({menuBoundsP.size.x / 2.f, menuBoundsP.size.y / 2.f});
-    menuTextPause.setPosition(menuButtonPause.getPosition());
+    // Schermata di Game Over (il punteggio viene aggiornato in render)
+    gameOverText.setString("GAME OVER");
+    gameOverText.setCharacterSize(60);
+    gameOverText.setFillColor(sf::Color::White);
+    centerText(gameOverText, {centerX, 250.f});
 
-    exitButtonPause.setSize({350.f, 60.f});
-    exitButtonPause.setFillColor(sf::Color(100, 100, 100));
-    exitButtonPause.setOutlineThickness(2.f);
-    exitButtonPause.setOutlineColor(sf::Color::White);
-    exitButtonPause.setOrigin({175.f, 30.f});
-    exitButtonPause.setPosition({400.f, 400.f});
+    finalScoreText.setCharacterSize(25);
+    finalScoreText.setFillColor(sf::Color::White);
+}
 
-    exitTextPause.setString("ESCI DAL GIOCO");
-    exitTextPause.setCharacterSize(25);
-    exitTextPause.setFillColor(sf::Color::White);
-    sf::FloatRect exitBoundsP = exitTextPause.getLocalBounds();
-    exitTextPause.setOrigin({exitBoundsP.size.x / 2.f, exitBoundsP.size.y / 2.f});
-    exitTextPause.setPosition(exitButtonPause.getPosition());
-
-    player.setTexture(playerTex, true);
-    playerScale = 50.f / playerTex.getSize().x;
-    player.setScale({playerScale, playerScale});
-    player.setOrigin({playerTex.getSize().x / 2.f, playerTex.getSize().y / 2.f});
-    player.setPosition({400.f, 300.f});
-
-    shieldVisual.setFillColor(sf::Color(0, 255, 255, 100));
-    shieldVisual.setOrigin({40.f, 40.f});
-
-    gameView = window.getDefaultView();
-
-    std::random_device rd;
-    gen.seed(rd());
-
-    for (int i = 0; i < 150; ++i) {
+void Game::initStars() {
+    for (int i = 0; i < Config::StarCount; ++i) {
         Star s;
         float r = radiusDist(gen);
         s.shape.setRadius(r);
         s.shape.setFillColor(sf::Color(255, 255, 255, alphaDist(gen)));
         s.shape.setPosition({xFullDist(gen), yFullDist(gen)});
-        s.speed = r * 0.5f; 
+        s.speed = r * 0.5f;
         stars.push_back(s);
     }
 }
 
+// ---------------------------------------------------------------------------
+// Interfaccia
+// ---------------------------------------------------------------------------
+
+// Imposta l'origine al centro del testo e lo posiziona
+void Game::centerText(sf::Text& text, sf::Vector2f position) {
+    sf::FloatRect bounds = text.getLocalBounds();
+    text.setOrigin({bounds.size.x / 2.f, bounds.size.y / 2.f});
+    text.setPosition(position);
+}
+
+// Crea un pulsante rettangolare con il testo centrato sopra
+void Game::setupButton(sf::RectangleShape& button, sf::Text& label, const std::string& caption,
+                       sf::Vector2f position, sf::Vector2f size, unsigned int characterSize) {
+    button.setSize(size);
+    button.setFillColor(sf::Color(100, 100, 100));
+    button.setOutlineThickness(2.f);
+    button.setOutlineColor(sf::Color::White);
+    button.setOrigin({size.x / 2.f, size.y / 2.f});
+    button.setPosition(position);
+
+    label.setString(caption);
+    label.setCharacterSize(characterSize);
+    label.setFillColor(sf::Color::White);
+    centerText(label, position);
+}
+
+// Schiarisce il pulsante quando il mouse ci passa sopra
+void Game::updateButtonHover(sf::RectangleShape& button, sf::Vector2f mousePos) {
+    if (button.getGlobalBounds().contains(mousePos)) button.setFillColor(sf::Color(150, 150, 150));
+    else button.setFillColor(sf::Color(100, 100, 100));
+}
+
+// ---------------------------------------------------------------------------
+// Stato della partita
+// ---------------------------------------------------------------------------
+
 void Game::run() {
     while (window.isOpen()) {
         sf::Time deltaTime = dtClock.restart();
-        
+
         // Pulizia dei suoni completati
         activeSounds.erase(std::remove_if(activeSounds.begin(), activeSounds.end(),
             [](const sf::Sound& s) { return s.getStatus() == sf::Sound::Status::Stopped; }),
@@ -190,8 +194,15 @@ void Game::run() {
     }
 }
 
+void Game::startGame() {
+    currentState = GameState::Gameplay;
+    enemySpawnClock.restart();
+    powerUpSpawnClock.restart();
+    bgMusic.play();
+}
+
 void Game::resetGame() {
-    player.setPosition({400.f, 300.f});
+    player.reset(Config::WindowWidth / 2.f, Config::WindowHeight / 2.f);
     bullets.clear();
     enemyBullets.clear();
     enemies.clear();
@@ -209,32 +220,9 @@ void Game::resetGame() {
     activeSounds.clear();
 }
 
-void Game::playSound(const sf::SoundBuffer& buffer, float volume) {
-    activeSounds.emplace_back(buffer);
-    activeSounds.back().setVolume(volume);
-    activeSounds.back().play();
-}
-
-void Game::spawnExplosion(sf::Vector2f pos, sf::Color color, int count) {
-    std::uniform_real_distribution<float> angleDist(0.f, 6.28318f);
-    std::uniform_real_distribution<float> speedDist(1.0f, 6.0f);
-    std::uniform_real_distribution<float> lifeDist(0.2f, 0.6f);
-    
-    for (int i = 0; i < count; ++i) {
-        Particle p;
-        p.shape.setSize({4.f, 4.f});
-        p.shape.setFillColor(color);
-        p.shape.setOrigin({2.f, 2.f});
-        p.shape.setPosition(pos);
-        
-        float angle = angleDist(gen);
-        float speed = speedDist(gen);
-        p.velocity = {std::cos(angle) * speed, std::sin(angle) * speed};
-        p.lifetime = lifeDist(gen);
-        p.maxLifetime = p.lifetime;
-        particles.push_back(p);
-    }
-}
+// ---------------------------------------------------------------------------
+// Input
+// ---------------------------------------------------------------------------
 
 void Game::processEvents() {
     while (const std::optional<sf::Event> event = window.pollEvent()) {
@@ -242,10 +230,7 @@ void Game::processEvents() {
 
         if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
             if (currentState == GameState::MainMenu && keyPressed->scancode == sf::Keyboard::Scancode::Enter) {
-                currentState = GameState::Gameplay;
-                enemySpawnClock.restart();
-                powerUpSpawnClock.restart();
-                bgMusic.play();
+                startGame();
             }
             else if (currentState == GameState::Gameplay && keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
                 currentState = GameState::GameOver;
@@ -271,304 +256,359 @@ void Game::processEvents() {
                 sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
                 if (currentState == GameState::MainMenu) {
-                    if (startButton.getGlobalBounds().contains(mousePos)) {
-                        currentState = GameState::Gameplay;
-                        enemySpawnClock.restart();
-                        powerUpSpawnClock.restart();
-                        bgMusic.play();
-                    }
-                    if (exitButtonMenu.getGlobalBounds().contains(mousePos)) {
-                        window.close();
-                    }
+                    if (startButton.getGlobalBounds().contains(mousePos)) startGame();
+                    if (exitButtonMenu.getGlobalBounds().contains(mousePos)) window.close();
                 }
-                
+
                 if (currentState == GameState::Pause) {
                     if (menuButtonPause.getGlobalBounds().contains(mousePos)) {
                         resetGame();
                         currentState = GameState::MainMenu;
                         bgMusic.stop();
                     }
-                    if (exitButtonPause.getGlobalBounds().contains(mousePos)) {
-                        window.close();
-                    }
+                    if (exitButtonPause.getGlobalBounds().contains(mousePos)) window.close();
                 }
 
-                if (currentState == GameState::Gameplay) {
-                    playSound(shootBuffer, 40.f); 
-
-                    float angleRad = player.getRotation().asRadians() - 1.5707963f;
-                    sf::Vector2f spawnPos = player.getPosition();
-                    spawnPos.x += std::cos(angleRad) * noseOffset;
-                    spawnPos.y += std::sin(angleRad) * noseOffset;
-
-                    auto spawnBullet = [&](float angleOffset) {
-                        Bullet newBullet;
-                        newBullet.shape.setSize({10.f, 4.f});
-                        newBullet.shape.setFillColor(sf::Color::Yellow);
-                        newBullet.shape.setOrigin({5.f, 2.f});
-                        newBullet.shape.setPosition(spawnPos);
-                        
-                        float finalAngle = angleRad + angleOffset;
-                        newBullet.shape.setRotation(sf::radians(finalAngle + 1.5707963f));
-                        newBullet.velocity.x = std::cos(finalAngle) * bulletSpeed;
-                        newBullet.velocity.y = std::sin(finalAngle) * bulletSpeed;
-                        bullets.push_back(newBullet);
-                    };
-
-                    if (hasSpread) {
-                        spawnBullet(-0.2f);
-                        spawnBullet(0.0f);
-                        spawnBullet(0.2f);
-                    } else {
-                        spawnBullet(0.0f);
-                    }
-                }
+                if (currentState == GameState::Gameplay) shootBullet();
             }
         }
     }
 }
 
-void Game::update(sf::Time deltaTime) {
-    sf::Vector2f mousePosHover = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-    
-    if (currentState == GameState::MainMenu) {
-        if (startButton.getGlobalBounds().contains(mousePosHover)) startButton.setFillColor(sf::Color(150, 150, 150));
-        else startButton.setFillColor(sf::Color(100, 100, 100));
+void Game::shootBullet() {
+    playSound(shootBuffer, 40.f);
 
-        if (exitButtonMenu.getGlobalBounds().contains(mousePosHover)) exitButtonMenu.setFillColor(sf::Color(150, 150, 150));
-        else exitButtonMenu.setFillColor(sf::Color(100, 100, 100));
+    float angleRad = player.shape.getRotation().asRadians() - Config::SpriteRotationOffset;
+    sf::Vector2f spawnPos = player.shape.getPosition();
+    spawnPos.x += std::cos(angleRad) * Config::NoseOffset;
+    spawnPos.y += std::sin(angleRad) * Config::NoseOffset;
+
+    auto spawnBullet = [&](float angleOffset) {
+        Bullet newBullet;
+        newBullet.shape.setSize({10.f, 4.f});
+        newBullet.shape.setFillColor(sf::Color::Yellow);
+        newBullet.shape.setOrigin({5.f, 2.f});
+        newBullet.shape.setPosition(spawnPos);
+
+        float finalAngle = angleRad + angleOffset;
+        newBullet.shape.setRotation(sf::radians(finalAngle + Config::SpriteRotationOffset));
+        newBullet.velocity.x = std::cos(finalAngle) * Config::BulletSpeed;
+        newBullet.velocity.y = std::sin(finalAngle) * Config::BulletSpeed;
+        bullets.push_back(newBullet);
+    };
+
+    if (hasSpread) {
+        spawnBullet(-0.2f);
+        spawnBullet(0.0f);
+        spawnBullet(0.2f);
+    } else {
+        spawnBullet(0.0f);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Logica di gioco
+// ---------------------------------------------------------------------------
+
+void Game::update(sf::Time deltaTime) {
+    sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+
+    if (currentState == GameState::MainMenu) {
+        updateButtonHover(startButton, mousePos);
+        updateButtonHover(exitButtonMenu, mousePos);
     }
     else if (currentState == GameState::Pause) {
-        if (menuButtonPause.getGlobalBounds().contains(mousePosHover)) menuButtonPause.setFillColor(sf::Color(150, 150, 150));
-        else menuButtonPause.setFillColor(sf::Color(100, 100, 100));
-
-        if (exitButtonPause.getGlobalBounds().contains(mousePosHover)) exitButtonPause.setFillColor(sf::Color(150, 150, 150));
-        else exitButtonPause.setFillColor(sf::Color(100, 100, 100));
+        updateButtonHover(menuButtonPause, mousePos);
+        updateButtonHover(exitButtonPause, mousePos);
     }
 
     if (currentState == GameState::Gameplay) {
         survivalTime += deltaTime.asSeconds();
 
+        // Difficoltà progressiva: i nemici compaiono sempre più spesso
         currentSpawnRate = std::max(0.3f, 1.0f - (survivalTime * 0.015f));
-        
-        for (auto& s : stars) {
-            s.shape.move({0.f, s.speed});
-            if (s.shape.getPosition().y > 600.f) {
-                s.shape.setPosition({xFullDist(gen), -5.f});
-            }
-        }
 
-        if (hasSpread && spreadClock.getElapsedTime().asSeconds() > 8.0f) hasSpread = false;
-        if (isInvulnerable && invulnerabilityClock.getElapsedTime().asSeconds() > 1.5f) {
-            isInvulnerable = false;
-            player.setColor(sf::Color(255, 255, 255, 255));
-        }
-
-        if (isInvulnerable) {
-            int alpha = (int)(std::sin(invulnerabilityClock.getElapsedTime().asMilliseconds() / 50.f) * 127 + 128);
-            player.setColor(sf::Color(255, 255, 255, alpha));
-        }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) player.move({-playerSpeed, 0.f});
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) player.move({playerSpeed, 0.f});
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) player.move({0.f, -playerSpeed});
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) player.move({0.f, playerSpeed});
-
-        sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-        sf::Vector2f playerPos = player.getPosition();
-        player.setRotation(sf::radians(std::atan2(mousePos.y - playerPos.y, mousePos.x - playerPos.x) + 1.5707963f));
-
-        sf::Vector2f pos = player.getPosition();
-        float hw = player.getGlobalBounds().size.x / 2.f;
-        float hh = player.getGlobalBounds().size.y / 2.f;
-        if (pos.x < hw) pos.x = hw;
-        if (pos.x > 800.f - hw) pos.x = 800.f - hw;
-        if (pos.y < hh) pos.y = hh;
-        if (pos.y > 600.f - hh) pos.y = 600.f - hh;
-        player.setPosition(pos);
-
-        if (hasShield) shieldVisual.setPosition(player.getPosition());
-
-        for (auto pIt = particles.begin(); pIt != particles.end(); ) {
-            pIt->lifetime -= 1.0f / 60.0f;
-            if (pIt->lifetime <= 0) {
-                pIt = particles.erase(pIt);
-            } else {
-                pIt->shape.move(pIt->velocity);
-                sf::Color c = pIt->shape.getFillColor();
-                c.a = static_cast<std::uint8_t>((pIt->lifetime / pIt->maxLifetime) * 255);
-                pIt->shape.setFillColor(c);
-                ++pIt;
-            }
-        }
-
-        if (powerUpSpawnClock.getElapsedTime() >= powerUpSpawnRate) {
-            PowerUpType pType = (typeDist(gen) > 50) ? PowerUpType::Spread : PowerUpType::Shield;
-            const sf::Texture* pTex = (pType == PowerUpType::Spread) ? &spreadTex : &shieldTex;
-            PowerUp pu(*pTex, pType);
-            if (pTex->getSize().x > 0) {
-                pu.shape.setOrigin({pTex->getSize().x / 2.f, pTex->getSize().y / 2.f});
-                float scale = 30.f / pTex->getSize().x;
-                pu.shape.setScale({scale, scale});
-            }
-            pu.shape.setPosition({xDist(gen), yDist(gen)});
-            powerUps.push_back(pu);
-            powerUpSpawnClock.restart();
-        }
-
-        for (auto pIt = powerUps.begin(); pIt != powerUps.end(); ) {
-            if (pIt->shape.getGlobalBounds().findIntersection(player.getGlobalBounds())) {
-                if (pIt->type == PowerUpType::Spread) { hasSpread = true; spreadClock.restart(); }
-                else if (pIt->type == PowerUpType::Shield) { hasShield = true; }
-                pIt = powerUps.erase(pIt);
-            } else ++pIt;
-        }
-
-        for (auto it = bullets.begin(); it != bullets.end(); ) {
-            it->shape.move(it->velocity);
-            sf::Vector2f bPos = it->shape.getPosition();
-            if (bPos.x < 0 || bPos.x > 800 || bPos.y < 0 || bPos.y > 600) it = bullets.erase(it);
-            else ++it;
-        }
-
-        if (enemySpawnClock.getElapsedTime().asSeconds() >= currentSpawnRate) {
-            int roll = typeDist(gen);
-            EnemyType spawnType;
-            const sf::Texture* spawnTex;
-            int spawnHp;
-            if (roll <= 60) { spawnType = EnemyType::Base; spawnTex = &enemyTex; spawnHp = 1; }
-            else if (roll <= 80) { spawnType = EnemyType::Tank; spawnTex = &tankTex; spawnHp = 3; }
-            else { spawnType = EnemyType::Shooter; spawnTex = &shooterTex; spawnHp = 1; }
-            
-            Enemy newEnemy(*spawnTex, spawnType, spawnHp);
-            float enemyScale = ((spawnType == EnemyType::Tank) ? 55.f : 30.f) / spawnTex->getSize().x;
-            newEnemy.shape.setScale({enemyScale, enemyScale});
-            newEnemy.shape.setOrigin({spawnTex->getSize().x / 2.f, spawnTex->getSize().y / 2.f});
-            
-            int side = sideDist(gen);
-            float spawnX = 0.f, spawnY = 0.f;
-            if (side == 0) { spawnX = (xDist(gen) - 50.f) * 1.2f; spawnY = -50.f; }
-            else if (side == 1) { spawnX = 850.f; spawnY = (yDist(gen) - 50.f) * 1.2f; }
-            else if (side == 2) { spawnX = (xDist(gen) - 50.f) * 1.2f; spawnY = 650.f; }
-            else { spawnX = -50.f; spawnY = (yDist(gen) - 50.f) * 1.2f; }
-            
-            newEnemy.shape.setPosition({spawnX, spawnY});
-            enemies.push_back(newEnemy);
-            enemySpawnClock.restart();
-        }
-
-        for (auto& enemy : enemies) {
-            sf::Vector2f enemyPos = enemy.shape.getPosition();
-            float dx = player.getPosition().x - enemyPos.x;
-            float dy = player.getPosition().y - enemyPos.y;
-            float distance = std::sqrt(dx * dx + dy * dy);
-            
-            if (distance > 0.f) {
-                float spd = (enemy.type == EnemyType::Tank) ? enemySpeed * 0.5f : enemySpeed;
-                bool shouldMove = true;
-                
-                if (enemy.type == EnemyType::Shooter && distance < 250.f) {
-                    shouldMove = false;
-                    if (enemy.shootClock.getElapsedTime().asSeconds() >= 1.5f) {
-                        playSound(shootBuffer, 30.f); 
-
-                        Bullet eb;
-                        eb.shape.setSize({8.f, 8.f});
-                        eb.shape.setFillColor(sf::Color::Red);
-                        eb.shape.setOrigin({4.f, 4.f});
-                        eb.shape.setPosition(enemyPos);
-                        eb.velocity.x = (dx / distance) * 7.0f;
-                        eb.velocity.y = (dy / distance) * 7.0f;
-                        enemyBullets.push_back(eb);
-                        enemy.shootClock.restart();
-                    }
-                }
-                if (shouldMove) enemy.shape.move({(dx / distance) * spd, (dy / distance) * spd});
-            }
-        }
-
-        for (auto bIt = bullets.begin(); bIt != bullets.end(); ) {
-            bool bulletDestroyed = false;
-            for (auto eIt = enemies.begin(); eIt != enemies.end(); ) {
-                if (bIt->shape.getGlobalBounds().findIntersection(eIt->shape.getGlobalBounds())) {
-                    eIt->hp--;
-                    spawnExplosion(eIt->shape.getPosition(), sf::Color(255, 200, 0), 5);
-                    playSound(explosionBuffer, 30.f);
-
-                    if (eIt->hp <= 0) { 
-                        spawnExplosion(eIt->shape.getPosition(), sf::Color::Red, 20);
-                        playSound(explosionBuffer, 80.f); 
-                        eIt = enemies.erase(eIt); 
-                        score += 10; 
-                    }
-                    else ++eIt;
-                    
-                    bulletDestroyed = true;
-                    break;
-                } else ++eIt;
-            }
-            if (bulletDestroyed) bIt = bullets.erase(bIt);
-            else ++bIt;
-        }
-
-        auto takeDamage = [&]() {
-            if (!isInvulnerable) {
-                if (hasShield) {
-                    hasShield = false;
-                    isInvulnerable = true;
-                    invulnerabilityClock.restart();
-                    spawnExplosion(player.getPosition(), sf::Color::Cyan, 20);
-                    playSound(explosionBuffer, 90.f);
-                } else {
-                    lives--;
-                    isInvulnerable = true;
-                    shakeDuration = 0.3f; 
-                    invulnerabilityClock.restart();
-                    spawnExplosion(player.getPosition(), sf::Color::Green, 30);
-                    playSound(explosionBuffer, 100.f);
-                    
-                    if (lives <= 0) {
-                        currentState = GameState::GameOver;
-                        bgMusic.stop();
-                    }
-                }
-            }
-        };
-
-        for (auto eIt = enemies.begin(); eIt != enemies.end(); ) {
-            if (eIt->shape.getGlobalBounds().findIntersection(player.getGlobalBounds())) {
-                eIt = enemies.erase(eIt);
-                takeDamage();
-            } else ++eIt;
-        }
-
-        for (auto ebIt = enemyBullets.begin(); ebIt != enemyBullets.end(); ) {
-            ebIt->shape.move(ebIt->velocity);
-            if (ebIt->shape.getGlobalBounds().findIntersection(player.getGlobalBounds())) {
-                ebIt = enemyBullets.erase(ebIt);
-                takeDamage();
-            } 
-            else if (ebIt->shape.getPosition().x < 0 || ebIt->shape.getPosition().x > 800 || 
-                     ebIt->shape.getPosition().y < 0 || ebIt->shape.getPosition().y > 600) {
-                ebIt = enemyBullets.erase(ebIt);
-            } 
-            else ++ebIt;
-        }
-
-        if (shakeDuration > 0.f) {
-            shakeDuration -= 1.0f / 60.0f;
-            std::uniform_real_distribution<float> shakeDist(-shakeIntensity, shakeIntensity);
-            gameView.setCenter({400.f + shakeDist(gen), 300.f + shakeDist(gen)});
-        } else {
-            gameView.setCenter({400.f, 300.f});
-        }
-        window.setView(gameView);
+        updateVFX();
+        updatePlayer();
+        spawnPowerUp();
+        updatePowerUps();
+        updateBullets();
+        spawnEnemy();
+        updateEnemies();
+        handleCollisions();
+        updateEnemyBullets();
+        applyScreenShake();
     }
 }
 
+void Game::updatePlayer() {
+    if (hasSpread && spreadClock.getElapsedTime().asSeconds() > 8.0f) hasSpread = false;
+    if (isInvulnerable && invulnerabilityClock.getElapsedTime().asSeconds() > 1.5f) {
+        isInvulnerable = false;
+        player.shape.setColor(sf::Color(255, 255, 255, 255));
+    }
+
+    // Lampeggio durante l'invulnerabilità
+    if (isInvulnerable) {
+        int alpha = (int)(std::sin(invulnerabilityClock.getElapsedTime().asMilliseconds() / 50.f) * 127 + 128);
+        player.shape.setColor(sf::Color(255, 255, 255, alpha));
+    }
+
+    player.updateMovement(Config::PlayerSpeed);
+    player.updateRotation(window);
+    player.constrainBounds(static_cast<float>(Config::WindowWidth), static_cast<float>(Config::WindowHeight));
+
+    if (hasShield) shieldVisual.setPosition(player.shape.getPosition());
+}
+
+void Game::updateBullets() {
+    for (auto it = bullets.begin(); it != bullets.end(); ) {
+        it->shape.move(it->velocity);
+        sf::Vector2f bPos = it->shape.getPosition();
+        if (bPos.x < 0 || bPos.x > Config::WindowWidth || bPos.y < 0 || bPos.y > Config::WindowHeight) it = bullets.erase(it);
+        else ++it;
+    }
+}
+
+void Game::spawnEnemy() {
+    if (enemySpawnClock.getElapsedTime().asSeconds() < currentSpawnRate) return;
+
+    // Estrazione del tipo di nemico in base a una percentuale
+    int roll = typeDist(gen);
+    EnemyType spawnType;
+    const sf::Texture* spawnTex;
+    int spawnHp;
+    if (roll <= 60) { spawnType = EnemyType::Base; spawnTex = &enemyTex; spawnHp = 1; }
+    else if (roll <= 80) { spawnType = EnemyType::Tank; spawnTex = &tankTex; spawnHp = 3; }
+    else { spawnType = EnemyType::Shooter; spawnTex = &shooterTex; spawnHp = 1; }
+
+    Enemy newEnemy(*spawnTex, spawnType, spawnHp);
+    float enemyScale = ((spawnType == EnemyType::Tank) ? Config::TargetTankSize : Config::TargetEnemySize) / spawnTex->getSize().x;
+    newEnemy.shape.setScale({enemyScale, enemyScale});
+    newEnemy.shape.setOrigin({spawnTex->getSize().x / 2.f, spawnTex->getSize().y / 2.f});
+
+    // Comparsa appena fuori da uno dei quattro lati dello schermo
+    int side = sideDist(gen);
+    float spawnX = 0.f, spawnY = 0.f;
+    if (side == 0) { spawnX = (xDist(gen) - 50.f) * 1.2f; spawnY = -50.f; }
+    else if (side == 1) { spawnX = 850.f; spawnY = (yDist(gen) - 50.f) * 1.2f; }
+    else if (side == 2) { spawnX = (xDist(gen) - 50.f) * 1.2f; spawnY = 650.f; }
+    else { spawnX = -50.f; spawnY = (yDist(gen) - 50.f) * 1.2f; }
+
+    newEnemy.shape.setPosition({spawnX, spawnY});
+    enemies.push_back(newEnemy);
+    enemySpawnClock.restart();
+}
+
+void Game::updateEnemies() {
+    for (auto& enemy : enemies) {
+        sf::Vector2f enemyPos = enemy.shape.getPosition();
+        float dx = player.shape.getPosition().x - enemyPos.x;
+        float dy = player.shape.getPosition().y - enemyPos.y;
+        float distance = std::sqrt(dx * dx + dy * dy);
+
+        if (distance <= 0.f) continue;
+
+        float speed = (enemy.type == EnemyType::Tank) ? Config::EnemySpeed * 0.5f : Config::EnemySpeed;
+        bool shouldMove = true;
+
+        // Lo Shooter si ferma vicino al giocatore e gli spara contro
+        if (enemy.type == EnemyType::Shooter && distance < 250.f) {
+            shouldMove = false;
+            if (enemy.shootClock.getElapsedTime().asSeconds() >= 1.5f) {
+                playSound(shootBuffer, 30.f);
+
+                Bullet eb;
+                eb.shape.setSize({8.f, 8.f});
+                eb.shape.setFillColor(sf::Color::Red);
+                eb.shape.setOrigin({4.f, 4.f});
+                eb.shape.setPosition(enemyPos);
+                eb.velocity.x = (dx / distance) * 7.0f;
+                eb.velocity.y = (dy / distance) * 7.0f;
+                enemyBullets.push_back(eb);
+                enemy.shootClock.restart();
+            }
+        }
+        if (shouldMove) enemy.shape.move({(dx / distance) * speed, (dy / distance) * speed});
+    }
+}
+
+void Game::spawnPowerUp() {
+    if (powerUpSpawnClock.getElapsedTime() < powerUpSpawnRate) return;
+
+    PowerUpType pType = (typeDist(gen) > 50) ? PowerUpType::Spread : PowerUpType::Shield;
+    const sf::Texture* pTex = (pType == PowerUpType::Spread) ? &spreadTex : &shieldTex;
+    PowerUp pu(*pTex, pType);
+    if (pTex->getSize().x > 0) {
+        pu.shape.setOrigin({pTex->getSize().x / 2.f, pTex->getSize().y / 2.f});
+        float scale = Config::TargetPowerUpSize / pTex->getSize().x;
+        pu.shape.setScale({scale, scale});
+    }
+    pu.shape.setPosition({xDist(gen), yDist(gen)});
+    powerUps.push_back(pu);
+    powerUpSpawnClock.restart();
+}
+
+void Game::updatePowerUps() {
+    for (auto pIt = powerUps.begin(); pIt != powerUps.end(); ) {
+        if (pIt->shape.getGlobalBounds().findIntersection(player.shape.getGlobalBounds())) {
+            if (pIt->type == PowerUpType::Spread) { hasSpread = true; spreadClock.restart(); }
+            else if (pIt->type == PowerUpType::Shield) { hasShield = true; }
+            pIt = powerUps.erase(pIt);
+        } else ++pIt;
+    }
+}
+
+void Game::takeDamage() {
+    if (isInvulnerable) return;
+
+    if (hasShield) {
+        // Lo scudo assorbe il colpo
+        hasShield = false;
+        isInvulnerable = true;
+        invulnerabilityClock.restart();
+        spawnExplosion(player.shape.getPosition(), sf::Color::Cyan, 20);
+        playSound(explosionBuffer, 90.f);
+    } else {
+        lives--;
+        isInvulnerable = true;
+        shakeDuration = 0.3f;
+        invulnerabilityClock.restart();
+        spawnExplosion(player.shape.getPosition(), sf::Color::Green, 30);
+        playSound(explosionBuffer, 100.f);
+
+        if (lives <= 0) {
+            currentState = GameState::GameOver;
+            bgMusic.stop();
+        }
+    }
+}
+
+void Game::handleCollisions() {
+    // 1. Proiettili del giocatore contro nemici
+    for (auto bIt = bullets.begin(); bIt != bullets.end(); ) {
+        bool bulletDestroyed = false;
+        for (auto eIt = enemies.begin(); eIt != enemies.end(); ) {
+            if (bIt->shape.getGlobalBounds().findIntersection(eIt->shape.getGlobalBounds())) {
+                eIt->hp--;
+                spawnExplosion(eIt->shape.getPosition(), sf::Color(255, 200, 0), 5);
+                playSound(explosionBuffer, 30.f);
+
+                if (eIt->hp <= 0) {
+                    spawnExplosion(eIt->shape.getPosition(), sf::Color::Red, 20);
+                    playSound(explosionBuffer, 80.f);
+                    eIt = enemies.erase(eIt);
+                    score += 10;
+                }
+                else ++eIt;
+
+                bulletDestroyed = true;
+                break;
+            } else ++eIt;
+        }
+        if (bulletDestroyed) bIt = bullets.erase(bIt);
+        else ++bIt;
+    }
+
+    // 2. Nemici contro giocatore
+    for (auto eIt = enemies.begin(); eIt != enemies.end(); ) {
+        if (eIt->shape.getGlobalBounds().findIntersection(player.shape.getGlobalBounds())) {
+            eIt = enemies.erase(eIt);
+            takeDamage();
+        } else ++eIt;
+    }
+}
+
+// Muove i proiettili nemici, controlla se colpiscono il giocatore e li elimina fuori dallo schermo
+void Game::updateEnemyBullets() {
+    for (auto ebIt = enemyBullets.begin(); ebIt != enemyBullets.end(); ) {
+        ebIt->shape.move(ebIt->velocity);
+        sf::Vector2f pos = ebIt->shape.getPosition();
+
+        if (ebIt->shape.getGlobalBounds().findIntersection(player.shape.getGlobalBounds())) {
+            ebIt = enemyBullets.erase(ebIt);
+            takeDamage();
+        }
+        else if (pos.x < 0 || pos.x > Config::WindowWidth || pos.y < 0 || pos.y > Config::WindowHeight) {
+            ebIt = enemyBullets.erase(ebIt);
+        }
+        else ++ebIt;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Effetti
+// ---------------------------------------------------------------------------
+
+void Game::spawnExplosion(sf::Vector2f pos, sf::Color color, int count) {
+    std::uniform_real_distribution<float> angleDist(0.f, 6.28318f);
+    std::uniform_real_distribution<float> speedDist(1.0f, 6.0f);
+    std::uniform_real_distribution<float> lifeDist(0.2f, 0.6f);
+
+    for (int i = 0; i < count; ++i) {
+        Particle p;
+        p.shape.setSize({4.f, 4.f});
+        p.shape.setFillColor(color);
+        p.shape.setOrigin({2.f, 2.f});
+        p.shape.setPosition(pos);
+
+        float angle = angleDist(gen);
+        float speed = speedDist(gen);
+        p.velocity = {std::cos(angle) * speed, std::sin(angle) * speed};
+        p.lifetime = lifeDist(gen);
+        p.maxLifetime = p.lifetime;
+        particles.push_back(p);
+    }
+}
+
+void Game::playSound(const sf::SoundBuffer& buffer, float volume) {
+    activeSounds.emplace_back(buffer);
+    activeSounds.back().setVolume(volume);
+    activeSounds.back().play();
+}
+
+void Game::updateVFX() {
+    // Sfondo stellato
+    for (auto& s : stars) {
+        s.shape.move({0.f, s.speed});
+        if (s.shape.getPosition().y > Config::WindowHeight) {
+            s.shape.setPosition({xFullDist(gen), -5.f});
+        }
+    }
+
+    // Particelle delle esplosioni
+    for (auto pIt = particles.begin(); pIt != particles.end(); ) {
+        pIt->lifetime -= 1.0f / 60.0f;
+        if (pIt->lifetime <= 0) {
+            pIt = particles.erase(pIt);
+        } else {
+            pIt->shape.move(pIt->velocity);
+            sf::Color c = pIt->shape.getFillColor();
+            c.a = static_cast<std::uint8_t>((pIt->lifetime / pIt->maxLifetime) * 255);
+            pIt->shape.setFillColor(c);
+            ++pIt;
+        }
+    }
+}
+
+void Game::applyScreenShake() {
+    if (shakeDuration > 0.f) {
+        shakeDuration -= 1.0f / 60.0f;
+        std::uniform_real_distribution<float> shakeDist(-Config::ShakeIntensity, Config::ShakeIntensity);
+        gameView.setCenter({Config::WindowWidth / 2.f + shakeDist(gen), Config::WindowHeight / 2.f + shakeDist(gen)});
+    } else {
+        gameView.setCenter({Config::WindowWidth / 2.f, Config::WindowHeight / 2.f});
+    }
+    window.setView(gameView);
+}
+
+// ---------------------------------------------------------------------------
+// Rendering
+// ---------------------------------------------------------------------------
+
 void Game::render() {
     window.clear(sf::Color::Black);
-    
+
     if (currentState == GameState::MainMenu) {
         window.clear(sf::Color(20, 20, 50));
         window.draw(titleText);
@@ -577,24 +617,16 @@ void Game::render() {
         window.draw(exitButtonMenu);
         window.draw(exitTextMenu);
         window.draw(promptText);
-    } 
+    }
     else if (currentState == GameState::GameOver) {
-        window.clear(sf::Color(100, 0, 0)); 
-        sf::Text gameOverText(font, "GAME OVER", 60);
-        gameOverText.setFillColor(sf::Color::White);
-        sf::FloatRect goBounds = gameOverText.getLocalBounds();
-        gameOverText.setOrigin({goBounds.size.x / 2.f, goBounds.size.y / 2.f});
-        gameOverText.setPosition({400.f, 250.f});
-        
-        sf::Text finalScore(font, "Punteggio Finale: " + std::to_string(score) + "\nPremi INVIO per tornare al menu", 25);
-        finalScore.setFillColor(sf::Color::White);
-        sf::FloatRect fsBounds = finalScore.getLocalBounds();
-        finalScore.setOrigin({fsBounds.size.x / 2.f, fsBounds.size.y / 2.f});
-        finalScore.setPosition({400.f, 350.f});
+        window.clear(sf::Color(100, 0, 0));
+
+        finalScoreText.setString("Punteggio Finale: " + std::to_string(score) + "\nPremi INVIO per tornare al menu");
+        centerText(finalScoreText, {Config::WindowWidth / 2.f, 350.f});
 
         window.draw(gameOverText);
-        window.draw(finalScore);
-    } 
+        window.draw(finalScoreText);
+    }
     else if (currentState == GameState::Gameplay || currentState == GameState::Pause) {
         for (const auto& star : stars) window.draw(star.shape);
         for (const auto& pu : powerUps) window.draw(pu.shape);
@@ -602,13 +634,12 @@ void Game::render() {
         for (const auto& bullet : bullets) window.draw(bullet.shape);
         for (const auto& eb : enemyBullets) window.draw(eb.shape);
         for (const auto& enemy : enemies) window.draw(enemy.shape);
-        window.draw(player);
+        window.draw(player.shape);
         if (hasShield) window.draw(shieldVisual);
-        
-        hudText.setString("Punteggio: " + std::to_string(score) + 
-                  "\nVite: " + std::to_string(lives) + 
-                  "\nTempo: " + std::to_string(static_cast<int>(survivalTime)) + "s");
 
+        hudText.setString("Punteggio: " + std::to_string(score) +
+                  "\nVite: " + std::to_string(lives) +
+                  "\nTempo: " + std::to_string(static_cast<int>(survivalTime)) + "s");
         window.draw(hudText);
 
         if (currentState == GameState::Pause) {
@@ -620,6 +651,6 @@ void Game::render() {
             window.draw(exitTextPause);
         }
     }
-    
+
     window.display();
 }

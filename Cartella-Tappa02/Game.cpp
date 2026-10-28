@@ -8,6 +8,17 @@ Game::Game()
       currentState(GameState::MainMenu) 
 {
     window.setFramerateLimit(60);
+
+        //Per centrare la finestra
+    //________________________________________
+    sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
+    sf::Vector2i centerPos(
+        (desktop.size.x - window.getSize().x) / 2,
+        (desktop.size.y - window.getSize().y) / 2
+    );
+    window.setPosition(centerPos);
+    //______________________________________________________
+    
     player.init();
     std::cout << "Sei nel MAIN MENU. Premi INVIO per giocare." << std::endl;
 }

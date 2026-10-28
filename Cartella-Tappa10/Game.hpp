@@ -5,8 +5,11 @@
 #include <vector>
 #include <random>
 #include <optional>
+#include <string>
 #include <algorithm>
+#include "Config.hpp"
 #include "GameState.hpp"
+#include "Player.hpp"
 #include "Bullet.hpp"
 #include "Enemy.hpp"
 #include "PowerUp.hpp"
@@ -27,7 +30,6 @@ struct Game {
     sf::Music bgMusic;
     std::vector<sf::Sound> activeSounds;
 
-
     // Interfaccia
     sf::Text hudText;
     sf::Text titleText;
@@ -44,22 +46,20 @@ struct Game {
     sf::RectangleShape exitButtonPause;
     sf::Text exitTextPause;
 
+    sf::Text gameOverText;
+    sf::Text finalScoreText;
+
     // Giocatore
-    sf::Sprite player;
-    float playerScale;
-    float playerSpeed;
+    Player player;
 
     // Proiettili
     std::vector<Bullet> bullets;
     std::vector<Bullet> enemyBullets;
-    float bulletSpeed;
-    float noseOffset;
 
     // Nemici
     std::vector<Enemy> enemies;
-    float enemySpeed;
     sf::Clock enemySpawnClock;
-    float currentSpawnRate; 
+    float currentSpawnRate;
 
     // Potenziamenti
     std::vector<PowerUp> powerUps;
@@ -75,7 +75,6 @@ struct Game {
     // Effetti grafici
     std::vector<Particle> particles;
     float shakeDuration;
-    float shakeIntensity;
     sf::View gameView;
 
     // Sistema Random
@@ -100,10 +99,43 @@ struct Game {
     Game();
     void run();
 
+    // Inizializzazione
+    void loadResources();
+    void setupUI();
+    void initStars();
+
+    // Interfaccia
+    void centerText(sf::Text& text, sf::Vector2f position);
+    void setupButton(sf::RectangleShape& button, sf::Text& label, const std::string& caption,
+                     sf::Vector2f position, sf::Vector2f size, unsigned int characterSize);
+    void updateButtonHover(sf::RectangleShape& button, sf::Vector2f mousePos);
+
+    // Stato della partita
+    void startGame();
     void resetGame();
+
+    // Input
+    void processEvents();
+    void shootBullet();
+
+    // Logica di gioco
+    void update(sf::Time deltaTime);
+    void updatePlayer();
+    void updateBullets();
+    void spawnEnemy();
+    void updateEnemies();
+    void spawnPowerUp();
+    void updatePowerUps();
+    void takeDamage();
+    void handleCollisions();
+    void updateEnemyBullets();
+
+    // Effetti
     void spawnExplosion(sf::Vector2f pos, sf::Color color, int count = 15);
     void playSound(const sf::SoundBuffer& buffer, float volume = 50.f);
-    void processEvents();
-    void update(sf::Time deltaTime);
+    void updateVFX();
+    void applyScreenShake();
+
+    // Rendering
     void render();
 };

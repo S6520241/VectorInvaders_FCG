@@ -172,7 +172,9 @@ Nello specifico, questa tappa aggiunge:
 *   **Centratura dei testi:** L'origine di ogni testo viene impostata al centro dei suoi limiti (`getLocalBounds()`), così da poterlo centrare facilmente su pulsanti e schermo.
 *   **Misura del tempo:** Il game loop misura il tempo trascorso tra un fotogramma e l'altro (`deltaTime`) con un `sf::Clock`; questo valore viene usato per calcolare il tempo di sopravvivenza mostrato nell'HUD.
 *   **Reset della partita:** È stata introdotta la funzione `resetGame()`, che riporta in un unico punto tutte le variabili di gioco ai valori iniziali.
-*   **Riorganizzazione del codice:** In questa tappa la logica del giocatore e i parametri di gioco sono stati accorpati nella classe `Game`, dove la navicella è gestita direttamente come `sf::Sprite`.
+*   **Continuità con l'architettura precedente:** Nonostante l'aggiunta di menu, pausa e HUD, il giocatore continua a essere gestito dalla classe `Player` (movimento, rotazione e limiti dello schermo) e tutti i parametri di gioco restano centralizzati in `Config.hpp`.
+*   **Organizzazione in funzioni:** La logica di gioco è suddivisa in funzioni dedicate (`updatePlayer`, `updateBullets`, `spawnEnemy`, `updateEnemies`, `spawnPowerUp`, `updatePowerUps`, `handleCollisions`, `updateEnemyBullets`, `updateVFX`, `applyScreenShake`), che `update()` richiama in sequenza; il costruttore delega il caricamento delle risorse a `loadResources()` e la creazione dell'interfaccia a `setupUI()`.
+*   **Funzioni di supporto per l'interfaccia:** I pulsanti vengono creati tutti con la stessa funzione `setupButton()`, i testi vengono centrati con `centerText()` e l'effetto hover è gestito da `updateButtonHover()`; l'avvio della partita, comune al tasto Invio e al pulsante "INIZIA", è raccolto nella funzione `startGame()`.
 
 ## Tappa 10: Audio e Difficoltà Progressiva
 
@@ -183,9 +185,11 @@ Nello specifico, questa tappa aggiunge:
 *   **Effetti sonori:** Suoni per lo sparo del giocatore e degli Shooter (`shoot.wav`) e per i colpi e le esplosioni (`explosion.wav`), con volumi diversi a seconda dell'evento.
 *   **Difficoltà progressiva:** L'intervallo di comparsa dei nemici parte da 1 secondo e diminuisce con il tempo di sopravvivenza, fino a un minimo di 0,3 secondi.
 *   **Bilanciamento:** La velocità dei nemici passa da 2 a 2,5 e i power-up compaiono ogni 12 secondi invece che ogni 10.
+*   **Schermata di Game Over:** Al termine della partita viene mostrata la scritta "GAME OVER" con il punteggio finale e l'indicazione di premere Invio per tornare al menu.
 
 ### Soluzioni tecniche adottate
 *   **Musica in streaming:** La musica usa `sf::Music`, che legge il file un poco alla volta durante la riproduzione invece di caricarlo tutto in memoria.
 *   **Effetti sonori con buffer condivisi:** I suoni brevi sono caricati una sola volta in `sf::SoundBuffer`. Ogni volta che serve un suono, la funzione `playSound()` crea un nuovo `sf::Sound` collegato al buffer e lo aggiunge a un vettore, così più suoni possono essere riprodotti contemporaneamente.
 *   **Pulizia dei suoni (Erase-Remove):** Ad ogni ciclo del game loop i suoni terminati vengono rimossi dal vettore con l'idioma erase-remove (`std::remove_if` seguito da `erase`), evitando che il vettore cresca senza limite.
+*   **Testi del Game Over:** Le scritte della schermata finale vengono create una sola volta all'avvio, insieme al resto dell'interfaccia; ad ogni fotogramma viene aggiornato solo il testo del punteggio.
 *   **Formula della difficoltà:** L'intervallo di comparsa è calcolato come `max(0,3; 1 - tempo × 0,015)`; il minimo viene quindi raggiunto dopo circa 47 secondi di sopravvivenza.

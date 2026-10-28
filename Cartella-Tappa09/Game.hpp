@@ -4,7 +4,10 @@
 #include <vector>
 #include <random>
 #include <optional>
+#include <string>
+#include "Config.hpp"
 #include "GameState.hpp"
+#include "Player.hpp"
 #include "Bullet.hpp"
 #include "Enemy.hpp"
 #include "PowerUp.hpp"
@@ -37,19 +40,14 @@ struct Game {
     sf::Text exitTextPause;
 
     // Giocatore
-    sf::Sprite player;
-    float playerScale;
-    float playerSpeed;
+    Player player;
 
     // Proiettili
     std::vector<Bullet> bullets;
     std::vector<Bullet> enemyBullets;
-    float bulletSpeed;
-    float noseOffset;
 
     // Nemici
     std::vector<Enemy> enemies;
-    float enemySpeed;
     sf::Clock enemySpawnClock;
     sf::Time spawnRate;
 
@@ -67,7 +65,6 @@ struct Game {
     // Effetti grafici
     std::vector<Particle> particles;
     float shakeDuration;
-    float shakeIntensity;
     sf::View gameView;
 
     // Sistema Random
@@ -92,9 +89,42 @@ struct Game {
     Game();
     void run();
 
+    // Inizializzazione
+    void loadResources();
+    void setupUI();
+    void initStars();
+
+    // Interfaccia
+    void centerText(sf::Text& text, sf::Vector2f position);
+    void setupButton(sf::RectangleShape& button, sf::Text& label, const std::string& caption,
+                     sf::Vector2f position, sf::Vector2f size, unsigned int characterSize);
+    void updateButtonHover(sf::RectangleShape& button, sf::Vector2f mousePos);
+
+    // Stato della partita
+    void startGame();
     void resetGame();
-    void spawnExplosion(sf::Vector2f pos, sf::Color color, int count = 15);
+
+    // Input
     void processEvents();
+    void shootBullet();
+
+    // Logica di gioco
     void update(sf::Time deltaTime);
+    void updatePlayer();
+    void updateBullets();
+    void spawnEnemy();
+    void updateEnemies();
+    void spawnPowerUp();
+    void updatePowerUps();
+    void takeDamage();
+    void handleCollisions();
+    void updateEnemyBullets();
+
+    // Effetti
+    void spawnExplosion(sf::Vector2f pos, sf::Color color, int count = 15);
+    void updateVFX();
+    void applyScreenShake();
+
+    // Rendering
     void render();
 };

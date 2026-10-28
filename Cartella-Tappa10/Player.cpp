@@ -1,4 +1,5 @@
 #include "Player.hpp"
+#include "Config.hpp"
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <cmath>
@@ -43,7 +44,7 @@ void Player::updateRotation(const sf::RenderWindow& window) {
     sf::Vector2f playerPos = shape.getPosition();
     float dy = mousePos.y - playerPos.y;
     float dx = mousePos.x - playerPos.x;
-    shape.setRotation(sf::radians(std::atan2(dy, dx) + 1.5707963f));
+    shape.setRotation(sf::radians(std::atan2(dy, dx) + Config::SpriteRotationOffset));
 }
 
 void Player::constrainBounds(float windowWidth, float windowHeight) {
