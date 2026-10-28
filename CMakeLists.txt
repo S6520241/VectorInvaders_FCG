@@ -14,9 +14,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SFML)
 
-add_library(common INTERFACE)
-target_compile_features(common INTERFACE cxx_std_20)
-
 # --- TAPPA 01 ---
 add_executable(Tappa01
     Cartella-Tappa01/main.cpp
