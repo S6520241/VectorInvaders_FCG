@@ -86,6 +86,8 @@ Nello specifico, questa tappa aggiunge:
 *   **File `Enemy.cpp`:** Il nemico ottiene un costruttore che riceve la texture da utilizzare.
 *   **Finestra centrata:** All'avvio la finestra di gioco viene posizionata al centro del desktop.
 
+<img width="812" height="632" alt="image" src="https://github.com/user-attachments/assets/533f4e0d-dd4a-47d6-bc51-dcbce9760cef" />
+
 ### Soluzioni tecniche adottate
 *   **Dimensionamento indipendente dall'immagine:** In `Config.hpp` sono state aggiunte le dimensioni desiderate di giocatore e nemici (`TargetPlayerSize`, `TargetEnemySize`). Il fattore di scala viene calcolato dividendo la dimensione desiderata per la larghezza della texture, mantenendo le proporzioni originali; in questo modo si possono sostituire le immagini senza modificare il codice.
 *   **Origine al centro:** L'origine di ogni sprite viene impostata al centro della texture, così rotazione e posizionamento avvengono attorno al centro dell'oggetto.
@@ -102,6 +104,9 @@ Nello specifico, questa tappa aggiunge:
 *   **Shooter:** Si avvicina al giocatore; quando si trova a meno di 250 pixel si ferma e gli spara contro un proiettile ogni 1,5 secondi (20% delle comparse).
 *   **Proiettili nemici:** I colpi degli Shooter tolgono una vita quando colpiscono il giocatore e vengono eliminati quando escono dallo schermo.
 *   **Nuove texture:** Caricamento delle immagini `tank.png` e `shooter.png`.
+
+<img width="810" height="634" alt="image" src="https://github.com/user-attachments/assets/d29a29b0-e07a-4707-8e3e-4cd69c420785" />
+
 
 ### Soluzioni tecniche adottate
 *   **Tipo e punti vita del nemico:** La struttura `Enemy` è stata estesa con un'enumerazione `EnemyType` (Base, Tank, Shooter), un contatore di punti vita (`hp`) e un `sf::Clock` personale per la cadenza di sparo.
@@ -121,6 +126,10 @@ Nello specifico, questa tappa aggiunge:
 *   **Invulnerabilità temporanea:** Dopo aver subito un colpo, o dopo che lo scudo lo ha assorbito, il giocatore è invulnerabile per 1,5 secondi e la navicella lampeggia.
 *   **File `PowerUp.cpp` e `PowerUp.hpp`:** Nuova struttura per i potenziamenti, con texture dedicate (`powerup_spread.png`, `powerup_shield.png`).
 
+<img width="807" height="628" alt="image" src="https://github.com/user-attachments/assets/a3b91679-05f0-4bd9-919b-b94a496c9ad4" />
+<img width="805" height="629" alt="image" src="https://github.com/user-attachments/assets/a4db29d9-322b-4510-bf18-ed18a573cddf" />
+
+
 ### Soluzioni tecniche adottate
 *   **Tipo del power-up:** Ogni potenziamento memorizza il proprio tipo tramite un'enumerazione `PowerUpType` (Spread, Shield).
 *   **Stato del giocatore tramite flag:** Gli effetti attivi sono gestiti con variabili booleane (`hasSpread`, `hasShield`, `isInvulnerable`), ciascuna associata, dove serve, a un `sf::Clock` che ne misura la durata.
@@ -138,6 +147,8 @@ Nello specifico, questa tappa aggiunge:
 *   **Tremolio dello schermo (screen shake):** Quando il giocatore perde una vita, la visuale trema per 0,3 secondi.
 *   **Nuovi file `Star.hpp` e `Particle.hpp`:** Strutture dati per le stelle e per le particelle.
 
+<img width="809" height="627" alt="image" src="https://github.com/user-attachments/assets/77b760ba-97ca-4041-8f2b-06991c171649" />
+
 ### Soluzioni tecniche adottate
 *   **Effetto profondità (parallasse):** La velocità di ogni stella è proporzionale al suo raggio: le stelle più grandi, che sembrano più vicine, scorrono più velocemente. Quando una stella esce dal fondo dello schermo viene riposizionata in alto in una posizione orizzontale casuale.
 *   **Sistema di particelle:** Ogni particella ha una direzione casuale (angolo tra 0 e 2π), una velocità casuale e una durata di vita limitata. La sua trasparenza diminuisce in proporzione alla vita residua, così le particelle svaniscono gradualmente prima di essere rimosse dal vettore.
@@ -153,6 +164,9 @@ Nello specifico, questa tappa aggiunge:
 *   **Stato di pausa:** Premendo **P** la partita si ferma, sopra il gioco compare un velo scuro semitrasparente con la scritta "PAUSA" e i pulsanti per tornare al menu principale o uscire; premendo di nuovo **P** la partita riprende.
 *   **HUD:** Durante la partita vengono mostrati a schermo punteggio, vite rimaste e tempo di sopravvivenza.
 *   **Testi a schermo:** Caricamento di un font (`font.ttf`) per disegnare scritte con `sf::Text`.
+
+<img width="808" height="631" alt="image" src="https://github.com/user-attachments/assets/7a51f281-17f2-4aed-93a3-7648e60158e1" />
+<img width="807" height="631" alt="image" src="https://github.com/user-attachments/assets/550b1fd5-3097-4c03-b77b-5cd5a7523c98" />
 
 ### Soluzioni tecniche adottate
 *   **Nuovo stato `Pause`:** L'enumerazione `GameState` è stata estesa con lo stato di pausa. In pausa la logica di gioco non viene aggiornata, ma la scena continua a essere disegnata sotto il menu.
