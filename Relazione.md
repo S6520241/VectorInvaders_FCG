@@ -107,7 +107,6 @@ Nello specifico, questa tappa aggiunge:
 
 <img width="810" height="634" alt="image" src="https://github.com/user-attachments/assets/d29a29b0-e07a-4707-8e3e-4cd69c420785" />
 
-
 ### Soluzioni tecniche adottate
 *   **Tipo e punti vita del nemico:** La struttura `Enemy` è stata estesa con un'enumerazione `EnemyType` (Base, Tank, Shooter), un contatore di punti vita (`hp`) e un `sf::Clock` personale per la cadenza di sparo.
 *   **Estrazione percentuale:** Ad ogni comparsa viene estratto un numero da 1 a 100: da 1 a 60 si genera un nemico Base, da 61 a 80 un Tank, oltre 80 uno Shooter.
@@ -128,7 +127,6 @@ Nello specifico, questa tappa aggiunge:
 
 <img width="807" height="628" alt="image" src="https://github.com/user-attachments/assets/a3b91679-05f0-4bd9-919b-b94a496c9ad4" />
 <img width="805" height="629" alt="image" src="https://github.com/user-attachments/assets/a4db29d9-322b-4510-bf18-ed18a573cddf" />
-
 
 ### Soluzioni tecniche adottate
 *   **Tipo del power-up:** Ogni potenziamento memorizza il proprio tipo tramite un'enumerazione `PowerUpType` (Spread, Shield).
